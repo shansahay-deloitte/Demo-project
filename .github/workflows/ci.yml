@@ -21,9 +21,8 @@ jobs:
           nodeInstallPath=$(npm config get prefix)
           echo "$nodeInstallPath/bin" >> $GITHUB_PATH
           sf --version
-      - name: Authenticate to Salesforce
-        run: |
-          echo ${{ secrets.SFDC_PASSWORD }}${{ secrets.SFDC_SECURITY_TOKEN }} | sfdx force:auth:login --username ${{ secrets.SFDC_USERNAME }} --password-and-token ${{ secrets.SFDC_PASSWORD }}${{ secrets.SFDC_SECURITY_TOKEN }} --setdefaultdevhubusername --json
+      - name: 'Authenticate Dev Hub'
+        run: sf org login sfdx-url -f ./SFDC_AUTH_URL.txt -a devhub -d
       - name: Lint Lightning Web Components
         run: |
           npx eslint force-app/main/default/lwc/**/*.js

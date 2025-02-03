@@ -1,0 +1,46 @@
+name: Salesforce CI/CD
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set up Salesforce CLI
+        uses: wadewegner/sfdx-action@v2
+        with:
+          sfdx-version: latest
+
+      - name: Authenticate to Salesforce
+        run: |
+          echo $SFDC_PASSWORD$SFDC_SECURITY_TOKEN | sfdx force:auth:web:login --username ${{ secrets.SFDC_USERNAME }} --password-and-token ${{ secrets.SFDC_PASSWORD }}$SFDC_SECURITY_TOKEN --setdefaultdevhubusername --json
+
+      - name: Lint Lightning Web Components
+        run: |
+          npx eslint force-app/main/default/lwc/**/*.js
+
+      - name: Run Apex Tests
+        run: |
+          sfdx force:apex:test:run --resultformat human --synchronous
+
+      - name: Deploy to Salesforce
+        run: |
+          sfdx force:source:deploy -p force-app --json
+
+      - name: Notify Team (Optional: via Slack)
+        uses: slackapi/slack-github-action@v1
+        with:
+          channel: '#deployment-notifications'
+          text: 'Salesforce deployment completed successfully or failed.'
+        env:
+          SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }}

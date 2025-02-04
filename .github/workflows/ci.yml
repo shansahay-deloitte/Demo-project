@@ -22,7 +22,7 @@ jobs:
           echo "$nodeInstallPath/bin" >> $GITHUB_PATH
           sf --version
       - name: 'Authenticate Dev Hub'
-        run: sf org login sfdx-url --sfdx-url ${{secrets.SFDC_AUTH_URL}}
+        run: sfdx force:auth:login --url ${{secrets.SFDC_AUTH_URL}}
       - name: Lint Lightning Web Components
         run: |
           npx eslint force-app/main/default/lwc/**/*.js
